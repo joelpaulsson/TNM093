@@ -1,0 +1,135 @@
+/*
+  Created: Sep 01 2018
+  Author: Kahin Akram Hassan
+*/
+
+function sp(data){
+
+    this.data = data;
+    var div = '#scatter-plot';
+
+    var height = 500;
+    var parentWidth = $(div).parent().width();
+    var margin = {top: 20, right: 20, bottom: 60, left: 40},
+        width = parentWidth - margin.right - margin.left,
+        height = height - margin.top - margin.bottom;
+
+    var color = d3.scaleOrdinal(d3.schemeCategory20);
+
+    var tooltip = d3.select(div).append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
+
+    var x = d3.scaleLinear().range([0, width]);
+    var y = d3.scaleLinear().range([height, 0]);
+
+    /* Task 2
+      Initialize 4 (x,y,country,circle-size)
+      variables and assign different data attributes from the data filter
+      Then use domain() and extent to scale the axes
+
+      x and y domain code here*/
+
+    /*
+      Här skall ni skapa 4 variabler som ni kommer använda er av
+
+      Dessa!
+      var yValue = "Life_satisfaction";
+      var xValue = "Household_income";
+      var country = "Country";
+      var cost = "Self_reported_health";
+
+    */
+
+    //Sedan måste ni sätta en domain på både x och y, det kan ni göra mha extent och max
+    //ni måste välja ut de variabler ni har valt ovan från data
+
+    //Exempel från https://bl.ocks.org/d3noob/23e42c8f67210ac6c678db2cd07a747e
+    //x.domain(d3.extent(data, function(d) { return d[xValue]; }));
+    //y.domain([0, d3.max(data, function(d) { return d.close; })]);
+
+
+    var svg = d3.select(div).append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform","translate(" + margin.left + "," + margin.top + ")");
+
+        /* ~~ Task 3 Add the x and y Axis and title  ~~
+        Här måste ni använda den svg variabler ni har skapat för att lägga till axlarna..
+         kolla koden nedan..
+        */
+        svg.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(...) // add stuff here..
+                    .append("text")
+                    .attr("class", "label")
+                    .attr("x", width-90)
+                    .attr("y", -6)
+                    .style('fill','black')
+                    .style("font-size", "20px")
+                    .text(...); // add stuff here..
+
+
+
+        /* ~~ Task 4 Add the scatter dots. ~~ */
+        var circles = svg.selectAll(".dot")
+                    .data(...) // add stuff here
+                    .enter().append("circle")
+                    .attr("class", "circle")
+                    .attr("class", "non_brushed")
+                    .attr("r", ...)//task size normalize
+                    .attr("cx", ...)
+                    .attr("cy", ...)
+                    .style("fill", function(d) { return color(d[country]); }); // task color
+
+
+        /* ~~ Task 5 create the brush variable and call highlightBrushedCircles() ~~
+        kolla på http://bl.ocks.org/feyderm/6bdbc74236c27a843db633981ad22c1b
+         */
+        var brush = ...
+
+         //highlightBrushedCircles function
+         function highlightBrushedCircles() {
+             if (d3.event.selection != null) {
+                 // revert circles to initial style
+                 circles.attr("class", "non_brushed");
+                 var brush_coords = d3.brushSelection(this);
+                 // style brushed circles
+                   circles.filter(function (){
+                            var cx = d3.select(this).attr("cx");
+                            var cy = d3.select(this).attr("cy");
+                            return isBrushed(brush_coords, cx, cy);
+                  })
+                  .attr("class", "brushed");
+                   var d_brushed =  d3.selectAll(".brushed").data();
+
+                   /* ~~~ Call selectCountry in map to filter ~~~ */
+
+             }
+         }//highlightBrushedCircles
+         function isBrushed(brush_coords, cx, cy) {
+              var x0 = brush_coords[0][0],
+                  x1 = brush_coords[1][0],
+                  y0 = brush_coords[0][1],
+                  y1 = brush_coords[1][1];
+             return x0 <= cx && cx <= x1 && y0 <= cy && cy <= y1;
+         }//isBrushed
+
+
+
+         //Select all the dots filtered
+         this.selecDots = function(value){
+
+           var dots = d3.selectAll('.non_brushed');
+
+                      dots.style('stroke',function(dot){
+                        return value.every(function(c){
+                          return c.Country != dot.Country ? 'black' : null;
+                        }) ? null : 'black';
+                      }).style('stroke-width','3px')
+         };
+
+
+}//End
